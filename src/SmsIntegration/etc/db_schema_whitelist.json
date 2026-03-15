@@ -1,0 +1,57 @@
+{
+    "kwtsms_sms_log": {
+        "column": {
+            "entity_id": true,
+            "recipient": true,
+            "message": true,
+            "event_type": true,
+            "status": true,
+            "api_response": true,
+            "msg_id": true,
+            "points_charged": true,
+            "error_code": true,
+            "related_entity_id": true,
+            "related_entity_type": true,
+            "test_mode": true,
+            "created_at": true
+        },
+        "index": {
+            "KWTSMS_SMS_LOG_STATUS": true,
+            "KWTSMS_SMS_LOG_EVENT_TYPE": true,
+            "KWTSMS_SMS_LOG_CREATED_AT": true,
+            "KWTSMS_SMS_LOG_MSG_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    },
+    "kwtsms_sms_template": {
+        "column": {
+            "entity_id": true,
+            "event_type": true,
+            "name": true,
+            "message_en": true,
+            "message_ar": true,
+            "is_active": true,
+            "recipient_type": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "KWTSMS_SMS_TEMPLATE_EVENT_TYPE": true
+        }
+    },
+    "kwtsms_gateway_data": {
+        "column": {
+            "entity_id": true,
+            "data_type": true,
+            "data_value": true,
+            "synced_at": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "KWTSMS_GATEWAY_DATA_DATA_TYPE": true
+        }
+    }
+}

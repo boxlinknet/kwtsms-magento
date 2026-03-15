@@ -1,0 +1,146 @@
+<?php
+/**
+ * SMS Template Edit Form Template.
+ *
+ * @var \KwtSms\SmsIntegration\Block\Adminhtml\Template\Edit $block
+ */
+$template = $block->getTemplate();
+if ($template === null) {
+    return;
+}
+
+$saveUrl = $block->escapeUrl($block->getSaveUrl());
+$backUrl = $block->escapeUrl($block->getBackUrl());
+$placeholders = $block->getAvailablePlaceholders();
+$formKey = $block->escapeHtml($block->getFormKey());
+?>
+
+<div class="kwtsms-template-edit">
+    <div style="margin-bottom: 15px;">
+        <a href="<?= $backUrl ?>" class="action-default scalable">
+            <span><?= $block->escapeHtml(__('Back to Templates')) ?></span>
+        </a>
+    </div>
+
+    <form id="kwtsms-template-form" action="<?= $saveUrl ?>" method="post">
+        <input type="hidden" name="form_key" value="<?= $formKey ?>"/>
+        <input type="hidden" name="entity_id"
+               value="<?= (int) $template->getEntityId() ?>"/>
+
+        <div class="admin__page-section">
+            <div class="admin__page-section-title">
+                <span class="title"><?= $block->escapeHtml(__('Template Information')) ?></span>
+            </div>
+            <div class="admin__page-section-content">
+                <table class="admin__table-secondary">
+                    <tbody>
+                        <tr>
+                            <th><?= $block->escapeHtml(__('Template Name')) ?></th>
+                            <td><strong><?= $block->escapeHtml((string) $template->getName()) ?></strong></td>
+                        </tr>
+                        <tr>
+                            <th><?= $block->escapeHtml(__('Event Type')) ?></th>
+                            <td>
+                                <code><?= $block->escapeHtml((string) $template->getEventType()) ?></code>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="admin__page-section" style="margin-top: 20px;">
+            <div class="admin__page-section-title">
+                <span class="title"><?= $block->escapeHtml(__('Message Content')) ?></span>
+            </div>
+            <div class="admin__page-section-content">
+                <?php if (!empty($placeholders)): ?>
+                <div style="margin-bottom: 15px; padding: 10px; background: #f0f7ff; border: 1px solid #c5d9ed; border-radius: 4px;">
+                    <strong><?= $block->escapeHtml(__('Available Placeholders:')) ?></strong>
+                    <div style="margin-top: 5px;">
+                        <?php foreach ($placeholders as $placeholder): ?>
+                            <code style="display: inline-block; margin: 2px 4px; padding: 2px 6px; background: #fff; border: 1px solid #ddd; border-radius: 3px; cursor: pointer;"
+                                  class="kwtsms-placeholder" title="<?= $block->escapeHtmlAttr(__('Click to copy')) ?>">
+                                <?= $block->escapeHtml($placeholder) ?>
+                            </code>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <div class="admin__field">
+                    <label class="admin__field-label" for="message_en">
+                        <span><?= $block->escapeHtml(__('English Message')) ?></span>
+                    </label>
+                    <div class="admin__field-control">
+                        <textarea id="message_en" name="message_en"
+                                  class="admin__control-textarea"
+                                  rows="4"
+                                  style="width: 100%; max-width: 600px;"><?= $block->escapeHtml((string) $template->getMessageEn()) ?></textarea>
+                        <div class="admin__field-note" id="message_en_count">
+                            <?= $block->escapeHtml(__('Characters: 0')) ?>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin__field" style="margin-top: 10px;">
+                    <label class="admin__field-label" for="message_ar">
+                        <span><?= $block->escapeHtml(__('Arabic Message')) ?></span>
+                    </label>
+                    <div class="admin__field-control">
+                        <textarea id="message_ar" name="message_ar"
+                                  class="admin__control-textarea"
+                                  rows="4"
+                                  dir="rtl"
+                                  style="width: 100%; max-width: 600px;"><?= $block->escapeHtml((string) $template->getMessageAr()) ?></textarea>
+                        <div class="admin__field-note" id="message_ar_count">
+                            <?= $block->escapeHtml(__('Characters: 0')) ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <button type="submit" class="action-default scalable action-primary">
+                <span><?= $block->escapeHtml(__('Save Template')) ?></span>
+            </button>
+            <a href="<?= $backUrl ?>" class="action-default scalable" style="margin-left: 10px;">
+                <span><?= $block->escapeHtml(__('Cancel')) ?></span>
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+require(['jquery'], function($) {
+    function updateCharCount(textareaId, countId) {
+        var len = $(textareaId).val().length;
+        $(countId).text('<?= $block->escapeJs(__('Characters:')) ?> ' + len);
+    }
+
+    updateCharCount('#message_en', '#message_en_count');
+    updateCharCount('#message_ar', '#message_ar_count');
+
+    $('#message_en').on('input', function() {
+        updateCharCount('#message_en', '#message_en_count');
+    });
+
+    $('#message_ar').on('input', function() {
+        updateCharCount('#message_ar', '#message_ar_count');
+    });
+
+    $('.kwtsms-placeholder').on('click', function() {
+        var text = $(this).text().trim();
+        var activeTextarea = document.activeElement;
+        if (activeTextarea && (activeTextarea.id === 'message_en' || activeTextarea.id === 'message_ar')) {
+            var start = activeTextarea.selectionStart;
+            var end = activeTextarea.selectionEnd;
+            var val = $(activeTextarea).val();
+            $(activeTextarea).val(val.substring(0, start) + text + val.substring(end));
+            activeTextarea.selectionStart = activeTextarea.selectionEnd = start + text.length;
+            $(activeTextarea).trigger('input');
+        }
+    });
+});
+</script>

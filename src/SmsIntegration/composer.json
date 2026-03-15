@@ -1,0 +1,25 @@
+{
+    "name": "kwtsms/module-sms-integration",
+    "description": "SMS notifications and OTP via kwtSMS gateway for Adobe Commerce",
+    "type": "magento2-module",
+    "version": "1.0.0",
+    "license": ["OSL-3.0"],
+    "require": {
+        "php": "~8.2.0||~8.3.0",
+        "magento/framework": ">=103.0.7",
+        "magento/module-sales": ">=103.0.0",
+        "magento/module-customer": ">=103.0.0",
+        "magento/module-backend": ">=102.0.0",
+        "magento/module-config": ">=101.2.0",
+        "magento/module-cron": ">=102.0.0",
+        "magento/module-catalog-inventory": ">=100.4.0"
+    },
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "KwtSms\\SmsIntegration\\": ""
+        }
+    }
+}

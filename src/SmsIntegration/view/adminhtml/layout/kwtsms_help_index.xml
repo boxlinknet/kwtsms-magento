@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * kwtSMS Help page layout configuration.
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="content">
+            <block class="Magento\Backend\Block\Template"
+                   name="kwtsms.help"
+                   template="KwtSms_SmsIntegration::help.phtml"/>
+        </referenceContainer>
+    </body>
+</page>

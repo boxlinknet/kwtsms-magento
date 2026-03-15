@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * kwtSMS SMS Integration - Dependency Injection Configuration
+ *
+ * Binds interfaces to implementations (preferences),
+ * configures UI component data providers, and virtual types.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <!-- Repository preferences -->
+    <preference for="KwtSms\SmsIntegration\Api\Data\SmsLogInterface"
+                type="KwtSms\SmsIntegration\Model\SmsLog"/>
+    <preference for="KwtSms\SmsIntegration\Api\Data\SmsTemplateInterface"
+                type="KwtSms\SmsIntegration\Model\SmsTemplate"/>
+    <preference for="KwtSms\SmsIntegration\Api\Data\GatewayDataInterface"
+                type="KwtSms\SmsIntegration\Model\GatewayData"/>
+    <preference for="KwtSms\SmsIntegration\Api\SmsLogRepositoryInterface"
+                type="KwtSms\SmsIntegration\Model\SmsLogRepository"/>
+    <preference for="KwtSms\SmsIntegration\Api\SmsTemplateRepositoryInterface"
+                type="KwtSms\SmsIntegration\Model\SmsTemplateRepository"/>
+
+    <!-- SMS Log Grid Data Provider -->
+    <virtualType name="KwtSmsSmsLogGridDataProvider"
+                 type="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider"/>
+
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="kwtsms_sms_log_listing_data_source" xsi:type="string">
+                    KwtSms\SmsIntegration\Model\ResourceModel\SmsLog\Grid\Collection
+                </item>
+                <item name="kwtsms_sms_template_listing_data_source" xsi:type="string">
+                    KwtSms\SmsIntegration\Model\ResourceModel\SmsTemplate\Grid\Collection
+                </item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- Grid Collections (virtual types wrapping the real collections) -->
+    <virtualType name="KwtSms\SmsIntegration\Model\ResourceModel\SmsLog\Grid\Collection"
+                 type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">kwtsms_sms_log</argument>
+            <argument name="resourceModel" xsi:type="string">KwtSms\SmsIntegration\Model\ResourceModel\SmsLog</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="KwtSms\SmsIntegration\Model\ResourceModel\SmsTemplate\Grid\Collection"
+                 type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">kwtsms_sms_template</argument>
+            <argument name="resourceModel" xsi:type="string">KwtSms\SmsIntegration\Model\ResourceModel\SmsTemplate</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Logger (use Magento's default logger, no custom handler needed for MVP) -->
+    <type name="KwtSms\SmsIntegration\Model\SmsSender">
+        <arguments>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
+        </arguments>
+    </type>
+    <type name="KwtSms\SmsIntegration\Model\Api\Client">
+        <arguments>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
+        </arguments>
+    </type>
+</config>

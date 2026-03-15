@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * kwtSMS SMS Integration - Database Schema
+ *
+ * Tables:
+ * - kwtsms_sms_log: All SMS send attempts with API responses
+ * - kwtsms_sms_template: Message templates per event type (EN/AR)
+ * - kwtsms_gateway_data: Cached gateway data (balance, senderids, coverage)
+ */
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+
+    <!-- SMS Log: stores every send attempt -->
+    <table name="kwtsms_sms_log" resource="default" engine="innodb" comment="kwtSMS SMS Log">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true" comment="Log ID"/>
+        <column xsi:type="varchar" name="recipient" nullable="false" length="20" comment="Full phone number"/>
+        <column xsi:type="text" name="message" nullable="false" comment="Message body sent"/>
+        <column xsi:type="varchar" name="event_type" nullable="false" length="50" comment="Trigger event identifier"/>
+        <column xsi:type="varchar" name="status" nullable="false" length="20" default="pending" comment="sent|failed|queued|test|skipped"/>
+        <column xsi:type="text" name="api_response" nullable="true" comment="Full JSON API response"/>
+        <column xsi:type="varchar" name="msg_id" nullable="true" length="64" comment="kwtSMS message ID"/>
+        <column xsi:type="int" name="points_charged" unsigned="true" nullable="false" default="0" comment="Credits used"/>
+        <column xsi:type="varchar" name="error_code" nullable="true" length="10" comment="Error code if failed"/>
+        <column xsi:type="varchar" name="related_entity_id" nullable="true" length="50" comment="Order ID, customer ID, etc."/>
+        <column xsi:type="varchar" name="related_entity_type" nullable="true" length="30" comment="order|customer|shipment|etc."/>
+        <column xsi:type="smallint" name="test_mode" unsigned="true" nullable="false" default="0" comment="1 if sent in test mode"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Send timestamp"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <index referenceId="KWTSMS_SMS_LOG_STATUS" indexType="btree">
+            <column name="status"/>
+        </index>
+        <index referenceId="KWTSMS_SMS_LOG_EVENT_TYPE" indexType="btree">
+            <column name="event_type"/>
+        </index>
+        <index referenceId="KWTSMS_SMS_LOG_CREATED_AT" indexType="btree">
+            <column name="created_at"/>
+        </index>
+        <index referenceId="KWTSMS_SMS_LOG_MSG_ID" indexType="btree">
+            <column name="msg_id"/>
+        </index>
+    </table>
+
+    <!-- SMS Templates: per-event message templates with EN/AR -->
+    <table name="kwtsms_sms_template" resource="default" engine="innodb" comment="kwtSMS SMS Templates">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true" comment="Template ID"/>
+        <column xsi:type="varchar" name="event_type" nullable="false" length="50" comment="Unique event identifier"/>
+        <column xsi:type="varchar" name="name" nullable="false" length="100" comment="Human-readable template name"/>
+        <column xsi:type="text" name="message_en" nullable="false" comment="English template with placeholders"/>
+        <column xsi:type="text" name="message_ar" nullable="true" comment="Arabic template with placeholders"/>
+        <column xsi:type="smallint" name="is_active" unsigned="true" nullable="false" default="1" comment="Enabled/disabled"/>
+        <column xsi:type="varchar" name="recipient_type" nullable="false" length="20" default="customer" comment="customer|admin|both"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Last modified"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="KWTSMS_SMS_TEMPLATE_EVENT_TYPE">
+            <column name="event_type"/>
+        </constraint>
+    </table>
+
+    <!-- Gateway Data: cached balance, senderids, coverage -->
+    <table name="kwtsms_gateway_data" resource="default" engine="innodb" comment="kwtSMS Gateway Cached Data">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true" comment="Row ID"/>
+        <column xsi:type="varchar" name="data_type" nullable="false" length="30" comment="balance|senderid|coverage"/>
+        <column xsi:type="text" name="data_value" nullable="true" comment="JSON data"/>
+        <column xsi:type="timestamp" name="synced_at" nullable="true" comment="Last sync time"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="KWTSMS_GATEWAY_DATA_TYPE">
+            <column name="data_type"/>
+        </constraint>
+    </table>
+</schema>

@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * kwtSMS SMS Log listing UI component.
+ * Displays the kwtsms_sms_log table records in an admin grid.
+ */
+-->
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">kwtsms_sms_log_listing.kwtsms_sms_log_listing_data_source</item>
+        </item>
+    </argument>
+
+    <settings>
+        <spinner>kwtsms_sms_log_columns</spinner>
+        <deps>
+            <dep>kwtsms_sms_log_listing.kwtsms_sms_log_listing_data_source</dep>
+        </deps>
+    </settings>
+
+    <dataSource name="kwtsms_sms_log_listing_data_source" component="Magento_Ui/js/grid/provider">
+        <settings>
+            <updateUrl path="mui/index/render"/>
+        </settings>
+        <aclResource>KwtSms_SmsIntegration::logs</aclResource>
+        <dataProvider class="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider"
+                      name="kwtsms_sms_log_listing_data_source">
+            <settings>
+                <requestFieldName>id</requestFieldName>
+                <primaryFieldName>entity_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+
+    <listingToolbar name="listing_top">
+        <settings>
+            <sticky>true</sticky>
+        </settings>
+        <bookmark name="bookmarks"/>
+        <columnsControls name="columns_controls"/>
+        <filterSearch name="fulltext"/>
+        <filters name="listing_filters"/>
+        <paging name="listing_paging"/>
+        <massaction name="listing_massaction" component="Magento_Ui/js/grid/tree-massactions">
+            <action name="delete">
+                <settings>
+                    <url path="kwtsms/log/clear"/>
+                    <type>delete</type>
+                    <label translate="true">Clear All Logs</label>
+                    <confirm>
+                        <title translate="true">Clear All Logs</title>
+                        <message translate="true">Are you sure you want to clear all SMS logs? This action cannot be undone.</message>
+                    </confirm>
+                </settings>
+            </action>
+        </massaction>
+        <exportButton name="export_button"/>
+    </listingToolbar>
+
+    <columns name="kwtsms_sms_log_columns">
+        <selectionsColumn name="ids" sortOrder="0">
+            <settings>
+                <indexField>entity_id</indexField>
+            </settings>
+        </selectionsColumn>
+
+        <column name="entity_id" sortOrder="10">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">ID</label>
+                <sorting>desc</sorting>
+            </settings>
+        </column>
+
+        <column name="created_at" class="Magento\Ui\Component\Listing\Columns\Date"
+                component="Magento_Ui/js/grid/columns/date" sortOrder="20">
+            <settings>
+                <filter>dateRange</filter>
+                <label translate="true">Date</label>
+                <dataType>date</dataType>
+            </settings>
+        </column>
+
+        <column name="event_type" sortOrder="30" component="Magento_Ui/js/grid/columns/select">
+            <settings>
+                <filter>select</filter>
+                <label translate="true">Event</label>
+                <dataType>select</dataType>
+                <options>
+                    <option name="order_new" xsi:type="array">
+                        <item name="value" xsi:type="string">order_new</item>
+                        <item name="label" xsi:type="string" translate="true">New Order (Customer)</item>
+                    </option>
+                    <option name="order_status_change" xsi:type="array">
+                        <item name="value" xsi:type="string">order_status_change</item>
+                        <item name="label" xsi:type="string" translate="true">Status Change (Customer)</item>
+                    </option>
+                    <option name="order_shipped" xsi:type="array">
+                        <item name="value" xsi:type="string">order_shipped</item>
+                        <item name="label" xsi:type="string" translate="true">Shipment (Customer)</item>
+                    </option>
+                    <option name="order_invoiced" xsi:type="array">
+                        <item name="value" xsi:type="string">order_invoiced</item>
+                        <item name="label" xsi:type="string" translate="true">Invoice (Customer)</item>
+                    </option>
+                    <option name="order_refunded" xsi:type="array">
+                        <item name="value" xsi:type="string">order_refunded</item>
+                        <item name="label" xsi:type="string" translate="true">Refund (Customer)</item>
+                    </option>
+                    <option name="order_cancelled" xsi:type="array">
+                        <item name="value" xsi:type="string">order_cancelled</item>
+                        <item name="label" xsi:type="string" translate="true">Cancelled (Customer)</item>
+                    </option>
+                    <option name="customer_welcome" xsi:type="array">
+                        <item name="value" xsi:type="string">customer_welcome</item>
+                        <item name="label" xsi:type="string" translate="true">Welcome (Customer)</item>
+                    </option>
+                    <option name="admin_new_order" xsi:type="array">
+                        <item name="value" xsi:type="string">admin_new_order</item>
+                        <item name="label" xsi:type="string" translate="true">New Order (Admin)</item>
+                    </option>
+                    <option name="admin_new_customer" xsi:type="array">
+                        <item name="value" xsi:type="string">admin_new_customer</item>
+                        <item name="label" xsi:type="string" translate="true">New Customer (Admin)</item>
+                    </option>
+                    <option name="admin_low_stock" xsi:type="array">
+                        <item name="value" xsi:type="string">admin_low_stock</item>
+                        <item name="label" xsi:type="string" translate="true">Low Stock (Admin)</item>
+                    </option>
+                </options>
+            </settings>
+        </column>
+
+        <column name="recipient" sortOrder="40">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Recipient</label>
+            </settings>
+        </column>
+
+        <column name="points_charged" sortOrder="50">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Credits</label>
+            </settings>
+        </column>
+
+        <column name="error_code" sortOrder="60">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Error</label>
+            </settings>
+        </column>
+
+        <column name="test_mode" component="Magento_Ui/js/grid/columns/select" sortOrder="70">
+            <settings>
+                <filter>select</filter>
+                <label translate="true">Test</label>
+                <dataType>select</dataType>
+                <options>
+                    <option name="no" xsi:type="array">
+                        <item name="value" xsi:type="string">0</item>
+                        <item name="label" xsi:type="string" translate="true">No</item>
+                    </option>
+                    <option name="yes" xsi:type="array">
+                        <item name="value" xsi:type="string">1</item>
+                        <item name="label" xsi:type="string" translate="true">Yes</item>
+                    </option>
+                </options>
+            </settings>
+        </column>
+
+        <column name="message" sortOrder="80">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Message</label>
+                <visible>false</visible>
+            </settings>
+        </column>
+
+        <!-- Status at far right -->
+        <column name="status" sortOrder="90" component="Magento_Ui/js/grid/columns/select">
+            <settings>
+                <filter>select</filter>
+                <label translate="true">Status</label>
+                <dataType>select</dataType>
+                <options>
+                    <option name="sent" xsi:type="array">
+                        <item name="value" xsi:type="string">sent</item>
+                        <item name="label" xsi:type="string" translate="true">Sent</item>
+                    </option>
+                    <option name="test" xsi:type="array">
+                        <item name="value" xsi:type="string">test</item>
+                        <item name="label" xsi:type="string" translate="true">Test</item>
+                    </option>
+                    <option name="failed" xsi:type="array">
+                        <item name="value" xsi:type="string">failed</item>
+                        <item name="label" xsi:type="string" translate="true">Failed</item>
+                    </option>
+                    <option name="skipped" xsi:type="array">
+                        <item name="value" xsi:type="string">skipped</item>
+                        <item name="label" xsi:type="string" translate="true">Skipped</item>
+                    </option>
+                    <option name="pending" xsi:type="array">
+                        <item name="value" xsi:type="string">pending</item>
+                        <item name="label" xsi:type="string" translate="true">Pending</item>
+                    </option>
+                </options>
+            </settings>
+        </column>
+    </columns>
+</listing>

@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * kwtSMS Integration for Magento 2
+ * Cron job configuration
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
+    <group id="default">
+        <job name="kwtsms_sync_gateway" instance="KwtSms\SmsIntegration\Cron\SyncGatewayData" method="execute">
+            <schedule>0 3 * * *</schedule>
+        </job>
+        <job name="kwtsms_low_stock_alert" instance="KwtSms\SmsIntegration\Cron\LowStockAlert" method="execute">
+            <schedule>0 8 * * *</schedule>
+        </job>
+        <job name="kwtsms_clean_logs" instance="KwtSms\SmsIntegration\Cron\CleanOldLogs" method="execute">
+            <schedule>0 2 * * 0</schedule>
+        </job>
+    </group>
+</config>

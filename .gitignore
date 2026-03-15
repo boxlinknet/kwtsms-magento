@@ -1,0 +1,44 @@
+# Claude Code / AI
+.claude/
+CLAUDE.md
+napkin.md
+.worktrees/
+
+# Documentation (local only)
+docs/
+
+# Environment
+.env
+.env.*
+
+# Docker volumes and data
+docker/data/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Magento
+vendor/
+var/
+pub/static/
+pub/media/
+generated/
+app/etc/env.php
+
+# Dependencies
+node_modules/
+Gemfile.lock
+
+# Logs and archives
+*.log
+*.zip
+
+# Tests output
+tests/

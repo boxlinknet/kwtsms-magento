@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * kwtSMS Integration for Magento 2
+ * Admin menu configuration
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="KwtSms_SmsIntegration::kwtsms"
+             title="kwtSMS"
+             module="KwtSms_SmsIntegration"
+             sortOrder="80"
+             parent="Magento_Backend::marketing"
+             resource="KwtSms_SmsIntegration::kwtsms"/>
+
+        <add id="KwtSms_SmsIntegration::dashboard"
+             title="Dashboard"
+             module="KwtSms_SmsIntegration"
+             sortOrder="10"
+             parent="KwtSms_SmsIntegration::kwtsms"
+             action="kwtsms/dashboard/index"
+             resource="KwtSms_SmsIntegration::dashboard"/>
+
+        <add id="KwtSms_SmsIntegration::templates_menu"
+             title="Templates"
+             module="KwtSms_SmsIntegration"
+             sortOrder="20"
+             parent="KwtSms_SmsIntegration::kwtsms"
+             action="kwtsms/template/index"
+             resource="KwtSms_SmsIntegration::templates"/>
+
+        <add id="KwtSms_SmsIntegration::logs_menu"
+             title="SMS Logs"
+             module="KwtSms_SmsIntegration"
+             sortOrder="30"
+             parent="KwtSms_SmsIntegration::kwtsms"
+             action="kwtsms/log/index"
+             resource="KwtSms_SmsIntegration::logs"/>
+
+        <add id="KwtSms_SmsIntegration::settings_menu"
+             title="Settings"
+             module="KwtSms_SmsIntegration"
+             sortOrder="40"
+             parent="KwtSms_SmsIntegration::kwtsms"
+             action="adminhtml/system_config/edit/section/kwtsms"
+             resource="KwtSms_SmsIntegration::config"/>
+
+        <add id="KwtSms_SmsIntegration::help_menu"
+             title="Help"
+             module="KwtSms_SmsIntegration"
+             sortOrder="50"
+             parent="KwtSms_SmsIntegration::kwtsms"
+             action="kwtsms/help/index"
+             resource="KwtSms_SmsIntegration::help"/>
+    </menu>
+</config>

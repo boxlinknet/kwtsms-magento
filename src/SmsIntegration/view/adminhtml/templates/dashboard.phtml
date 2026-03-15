@@ -1,0 +1,174 @@
+<?php
+/**
+ * kwtSMS Dashboard Template.
+ *
+ * @var \KwtSms\SmsIntegration\Block\Adminhtml\Dashboard $block
+ */
+$isEnabled = $block->isEnabled();
+$isTestMode = $block->isTestMode();
+$balance = $block->escapeHtml($block->getBalance());
+$senderId = $block->escapeHtml($block->getSenderId());
+$totalSent = $block->getTotalSent();
+$totalFailed = $block->getTotalFailed();
+$todaySent = $block->getTodaySent();
+$lastSync = $block->escapeHtml((string) $block->getLastSyncTime());
+$senderIds = $block->getSenderIds();
+$coverageDisplay = $block->escapeHtml($block->getCoverageDisplay());
+$syncUrl = $block->escapeUrl($block->getSyncUrl());
+?>
+
+<div class="kwtsms-dashboard">
+    <div class="admin__page-section">
+        <div class="admin__page-section-title">
+            <span class="title"><?= $block->escapeHtml(__('Connection Status')) ?></span>
+        </div>
+        <div class="admin__page-section-content">
+            <table class="admin__table-secondary">
+                <tbody>
+                    <tr>
+                        <th><?= $block->escapeHtml(__('Module Status')) ?></th>
+                        <td>
+                            <?php if ($isEnabled): ?>
+                                <span style="color: #006400; font-weight: bold;">&#9679; <?= $block->escapeHtml(__('Enabled')) ?></span>
+                            <?php else: ?>
+                                <span style="color: #8b0000; font-weight: bold;">&#9679; <?= $block->escapeHtml(__('Disabled')) ?></span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><?= $block->escapeHtml(__('Test Mode')) ?></th>
+                        <td>
+                            <?php if ($isTestMode): ?>
+                                <span style="color: #b8860b; font-weight: bold;"><?= $block->escapeHtml(__('ON')) ?></span>
+                                <span style="color: #666; font-size: 0.9em;">
+                                    (<?= $block->escapeHtml(__('SMS messages will not be delivered')) ?>)
+                                </span>
+                            <?php else: ?>
+                                <span style="color: #006400;"><?= $block->escapeHtml(__('OFF')) ?></span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><?= $block->escapeHtml(__('Balance (Available / Purchased)')) ?></th>
+                        <td>
+                            <strong><?= $balance ?></strong>
+                            <a href="https://www.kwtsms.com/login"
+                               target="_blank"
+                               rel="noopener"
+                               style="margin-left: 12px; font-size: 0.9em;">
+                                <?= $block->escapeHtml(__('Recharge / Account')) ?> &#8599;
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><?= $block->escapeHtml(__('Active Sender ID')) ?></th>
+                        <td><?= $senderId ?: $block->escapeHtml(__('Not configured')) ?></td>
+                    </tr>
+                    <?php if (!empty($senderIds)): ?>
+                    <tr>
+                        <th><?= $block->escapeHtml(__('Available Sender IDs')) ?></th>
+                        <td>
+                            <?php foreach ($senderIds as $sid): ?>
+                                <span style="display: inline-block; margin-right: 8px; padding: 2px 8px; background: #f0f0f0; border-radius: 3px;">
+                                    <?= $block->escapeHtml((string) $sid) ?>
+                                </span>
+                            <?php endforeach; ?>
+                        </td>
+                    </tr>
+                    <?php endif; ?>
+                    <?php if ($coverageDisplay): ?>
+                    <tr>
+                        <th><?= $block->escapeHtml(__('Coverage')) ?></th>
+                        <td><?= $coverageDisplay ?></td>
+                    </tr>
+                    <?php endif; ?>
+                    <tr>
+                        <th><?= $block->escapeHtml(__('Last Sync')) ?></th>
+                        <td>
+                            <?= $lastSync ?: $block->escapeHtml(__('Never')) ?>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div style="margin-top: 15px;">
+                <button id="kwtsms-sync-btn" type="button" class="action-default scalable">
+                    <span><?= $block->escapeHtml(__('Sync Now')) ?></span>
+                </button>
+                <span id="kwtsms-action-result" style="margin-left: 15px;"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin__page-section" style="margin-top: 20px;">
+        <div class="admin__page-section-title">
+            <span class="title"><?= $block->escapeHtml(__('Quick Statistics')) ?></span>
+        </div>
+        <div class="admin__page-section-content">
+            <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+                <div style="text-align: center; min-width: 120px; padding: 15px; background: #f8f8f8; border-radius: 4px;">
+                    <div style="font-size: 2em; font-weight: bold; color: #006400;">
+                        <?= (int) $totalSent ?>
+                    </div>
+                    <div style="color: #666; margin-top: 5px;">
+                        <?= $block->escapeHtml(__('Total Sent')) ?>
+                    </div>
+                </div>
+                <div style="text-align: center; min-width: 120px; padding: 15px; background: #f8f8f8; border-radius: 4px;">
+                    <div style="font-size: 2em; font-weight: bold; color: #8b0000;">
+                        <?= (int) $totalFailed ?>
+                    </div>
+                    <div style="color: #666; margin-top: 5px;">
+                        <?= $block->escapeHtml(__('Total Failed')) ?>
+                    </div>
+                </div>
+                <div style="text-align: center; min-width: 120px; padding: 15px; background: #f8f8f8; border-radius: 4px;">
+                    <div style="font-size: 2em; font-weight: bold; color: #333;">
+                        <?= (int) $todaySent ?>
+                    </div>
+                    <div style="color: #666; margin-top: 5px;">
+                        <?= $block->escapeHtml(__('Sent Today')) ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+require(['jquery'], function($) {
+    function doAjax(url, btnId) {
+        var btn = $(btnId);
+        var result = $('#kwtsms-action-result');
+
+        btn.prop('disabled', true);
+        result.text('Processing...').css('color', '#333');
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            dataType: 'json',
+            data: { form_key: window.FORM_KEY },
+            success: function(response) {
+                if (response.success) {
+                    result.text(response.message || 'Success!').css('color', 'green');
+                    if (response.balance) {
+                        result.text(result.text() + ' Balance: ' + response.balance);
+                    }
+                } else {
+                    result.text(response.message || 'Failed.').css('color', 'red');
+                }
+            },
+            error: function() {
+                result.text('Request failed. Check your network and try again.').css('color', 'red');
+            },
+            complete: function() {
+                btn.prop('disabled', false);
+            }
+        });
+    }
+
+    $('#kwtsms-sync-btn').on('click', function() {
+        doAjax('<?= $block->escapeJs($syncUrl) ?>', '#kwtsms-sync-btn');
+    });
+});
+</script>

@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * kwtSMS Integration for Magento 2
+ * ACL configuration
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin" title="Magento Admin" sortOrder="20">
+                <resource id="Magento_Backend::marketing" title="Marketing" sortOrder="60">
+                    <resource id="KwtSms_SmsIntegration::kwtsms" title="kwtSMS" sortOrder="100">
+                        <resource id="KwtSms_SmsIntegration::dashboard" title="Dashboard" sortOrder="10"/>
+                        <resource id="KwtSms_SmsIntegration::templates" title="Templates" sortOrder="20"/>
+                        <resource id="KwtSms_SmsIntegration::logs" title="SMS Logs" sortOrder="30">
+                            <resource id="KwtSms_SmsIntegration::logs_clear" title="Clear Logs" sortOrder="10"/>
+                        </resource>
+                        <resource id="KwtSms_SmsIntegration::config" title="Configuration" sortOrder="40"/>
+                        <resource id="KwtSms_SmsIntegration::help" title="Help" sortOrder="50"/>
+                        <resource id="KwtSms_SmsIntegration::admin_alerts" title="Admin Alerts" sortOrder="60"/>
+                    </resource>
+                </resource>
+                <resource id="Magento_Backend::stores" title="Stores" sortOrder="80">
+                    <resource id="Magento_Backend::stores_settings" title="Settings" sortOrder="10">
+                        <resource id="Magento_Config::config" title="Configuration" sortOrder="20">
+                            <resource id="KwtSms_SmsIntegration::config_kwtsms" title="kwtSMS" sortOrder="101"/>
+                        </resource>
+                    </resource>
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>

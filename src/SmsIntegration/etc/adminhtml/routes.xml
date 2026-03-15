@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * kwtSMS Integration for Magento 2
+ * Admin routes configuration
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
+    <router id="admin">
+        <route id="kwtsms" frontName="kwtsms">
+            <module name="KwtSms_SmsIntegration" before="Magento_Backend"/>
+        </route>
+    </router>
+</config>

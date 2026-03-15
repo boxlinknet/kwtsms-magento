@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Event Observer Registration.
+ *
+ * Registers SMS notification observers for sales, shipment,
+ * invoice, credit memo, cancellation, and customer registration events.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+
+    <!-- New order + status change both handled by OrderSaveAfter.
+         Detects new orders (origStatus is null) and status changes separately.
+         Works for both frontend checkout and admin-created orders. -->
+    <event name="sales_order_save_after">
+        <observer name="kwtsms_order_save_after"
+                  instance="KwtSms\SmsIntegration\Observer\OrderSaveAfter"/>
+    </event>
+
+    <event name="sales_order_shipment_save_after">
+        <observer name="kwtsms_shipment_save_after"
+                  instance="KwtSms\SmsIntegration\Observer\ShipmentSaveAfter"/>
+    </event>
+
+    <event name="sales_order_invoice_save_after">
+        <observer name="kwtsms_invoice_save_after"
+                  instance="KwtSms\SmsIntegration\Observer\InvoiceSaveAfter"/>
+    </event>
+
+    <event name="sales_order_creditmemo_save_after">
+        <observer name="kwtsms_creditmemo_save_after"
+                  instance="KwtSms\SmsIntegration\Observer\CreditmemoSaveAfter"/>
+    </event>
+
+    <event name="order_cancel_after">
+        <observer name="kwtsms_order_cancel_after"
+                  instance="KwtSms\SmsIntegration\Observer\OrderCancelAfter"/>
+    </event>
+
+    <event name="customer_register_success">
+        <observer name="kwtsms_customer_register_success"
+                  instance="KwtSms\SmsIntegration\Observer\CustomerRegisterSuccess"/>
+    </event>
+
+</config>

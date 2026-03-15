@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * kwtSMS SMS Integration Module
+ *
+ * Module declaration with dependency sequence.
+ * Loads after Sales, Customer, Backend, Config, Cron, and CatalogInventory modules.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
+    <module name="KwtSms_SmsIntegration">
+        <sequence>
+            <module name="Magento_Sales"/>
+            <module name="Magento_Customer"/>
+            <module name="Magento_Backend"/>
+            <module name="Magento_Config"/>
+            <module name="Magento_Cron"/>
+            <module name="Magento_CatalogInventory"/>
+        </sequence>
+    </module>
+</config>
