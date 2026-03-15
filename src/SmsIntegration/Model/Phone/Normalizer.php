@@ -18,14 +18,14 @@ use KwtSms\SmsIntegration\Model\Config;
 class Normalizer
 {
     /**
-     * @var Config
+     * @var Config|null
      */
-    private Config $config;
+    private ?Config $config;
 
     /**
-     * @param Config $config
+     * @param Config|null $config
      */
-    public function __construct(Config $config)
+    public function __construct(?Config $config = null)
     {
         $this->config = $config;
     }
@@ -57,7 +57,7 @@ class Normalizer
             return new Result(false, '', 'Phone number contains no valid digits');
         }
 
-        $countryCode = $defaultCountryCode ?? $this->config->getDefaultCountryCode();
+        $countryCode = $defaultCountryCode ?? ($this->config !== null ? $this->config->getDefaultCountryCode() : '965');
 
         // If number is short (local), prepend default country code
         if (strlen($phone) <= 9 && !$this->startsWith($phone, $countryCode)) {
