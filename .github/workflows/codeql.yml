@@ -17,11 +17,6 @@ jobs:
       contents: read
       security-events: write
 
-    strategy:
-      fail-fast: false
-      matrix:
-        language: [javascript]
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,12 +24,55 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
-          languages: ${{ matrix.language }}
-
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
+          languages: actions
+          queries: security-extended
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
-          category: "/language:${{ matrix.language }}"
+          category: "/language:actions"
+
+  php-security:
+    name: PHP Security Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+
+      - name: Check for dangerous functions
+        run: |
+          echo "Scanning for dangerous PHP functions..."
+          FOUND=0
+          for pattern in 'eval(' 'exec(' 'system(' 'passthru(' 'shell_exec(' 'proc_open(' 'popen('; do
+            if grep -rn "$pattern" src/ --include="*.php" | grep -v "Test/" | grep -v "vendor/"; then
+              FOUND=1
+            fi
+          done
+          if [ "$FOUND" -eq 1 ]; then
+            echo "::error::Dangerous PHP functions found"
+            exit 1
+          fi
+          echo "No dangerous functions found"
+
+      - name: Check for superglobals
+        run: |
+          echo "Scanning for direct superglobal access..."
+          if grep -rn '\$_GET\|\$_POST\|\$_REQUEST\|\$_SERVER\|\$_SESSION\|\$_COOKIE' src/ --include="*.php" | grep -v "Test/"; then
+            echo "::error::Direct superglobal access found"
+            exit 1
+          fi
+          echo "No superglobals found"
+
+      - name: Check for ObjectManager usage
+        run: |
+          echo "Scanning for direct ObjectManager usage..."
+          if grep -rn 'ObjectManager::getInstance\|new ObjectManager' src/ --include="*.php"; then
+            echo "::error::Direct ObjectManager usage found"
+            exit 1
+          fi
+          echo "No ObjectManager misuse found"
