@@ -24,6 +24,12 @@ use Psr\Log\LoggerInterface;
 class OrderSaveAfter implements ObserverInterface
 {
     /**
+     * Track orders already processed in this request to prevent duplicate SMS.
+     * @var array<string, bool>
+     */
+    private static array $processedOrders = [];
+
+    /**
      * @var Config
      */
     private Config $config;
@@ -87,6 +93,7 @@ class OrderSaveAfter implements ObserverInterface
                 return;
             }
 
+            $orderId = $order->getEntityId();
             $origStatus = $order->getOrigData('status');
             $currentStatus = $order->getStatus();
 
@@ -94,6 +101,13 @@ class OrderSaveAfter implements ObserverInterface
             if ($origStatus === $currentStatus) {
                 return;
             }
+
+            // Prevent duplicate SMS if order is saved multiple times in one request
+            $key = $orderId . ':' . ($origStatus ?? 'null') . ':' . $currentStatus;
+            if (isset(self::$processedOrders[$key])) {
+                return;
+            }
+            self::$processedOrders[$key] = true;
 
             $phone = $order->getBillingAddress()?->getTelephone();
             $incrementId = $order->getIncrementId();

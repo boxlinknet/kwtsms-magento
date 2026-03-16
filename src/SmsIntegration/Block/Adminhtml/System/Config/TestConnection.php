@@ -55,7 +55,7 @@ class TestConnection extends Field
      */
     protected function _getElementHtml(AbstractElement $element): string
     {
-        $ajaxUrl = $this->getAjaxUrl();
+        $ajaxUrl = $this->escapeJs($this->escapeUrl($this->getAjaxUrl()));
 
         return <<<HTML
 <button id="kwtsms_test_connection_button" type="button" class="action-default scalable">

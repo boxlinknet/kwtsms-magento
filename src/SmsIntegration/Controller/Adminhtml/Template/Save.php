@@ -66,10 +66,10 @@ class Save extends Action
             $template = $this->templateRepository->getById($id);
 
             if (isset($data['message_en'])) {
-                $template->setMessageEn((string) $data['message_en']);
+                $template->setMessageEn(strip_tags((string) $data['message_en']));
             }
             if (isset($data['message_ar'])) {
-                $template->setMessageAr((string) $data['message_ar']);
+                $template->setMessageAr(strip_tags((string) $data['message_ar']));
             }
 
             $this->templateRepository->save($template);
