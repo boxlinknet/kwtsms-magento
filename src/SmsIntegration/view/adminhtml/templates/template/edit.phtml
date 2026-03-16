@@ -17,13 +17,13 @@ $formKey = $block->escapeHtml($block->getFormKey());
 
 <div class="kwtsms-template-edit">
     <div style="margin-bottom: 15px;">
-        <a href="<?= $backUrl ?>" class="action-default scalable">
+        <a href="<?= $block->escapeUrl($backUrl) ?>" class="action-default scalable">
             <span><?= $block->escapeHtml(__('Back to Templates')) ?></span>
         </a>
     </div>
 
-    <form id="kwtsms-template-form" action="<?= $saveUrl ?>" method="post">
-        <input type="hidden" name="form_key" value="<?= $formKey ?>"/>
+    <form id="kwtsms-template-form" action="<?= $block->escapeUrl($saveUrl) ?>" method="post">
+        <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($formKey) ?>"/>
         <input type="hidden" name="entity_id"
                value="<?= (int) $template->getEntityId() ?>"/>
 
@@ -105,7 +105,7 @@ $formKey = $block->escapeHtml($block->getFormKey());
             <button type="submit" class="action-default scalable action-primary">
                 <span><?= $block->escapeHtml(__('Save Template')) ?></span>
             </button>
-            <a href="<?= $backUrl ?>" class="action-default scalable" style="margin-left: 10px;">
+            <a href="<?= $block->escapeUrl($backUrl) ?>" class="action-default scalable" style="margin-left: 10px;">
                 <span><?= $block->escapeHtml(__('Cancel')) ?></span>
             </a>
         </div>

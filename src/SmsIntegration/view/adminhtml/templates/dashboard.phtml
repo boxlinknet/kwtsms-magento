@@ -51,7 +51,7 @@ $syncUrl = $block->escapeUrl($block->getSyncUrl());
                     <tr>
                         <th><?= $block->escapeHtml(__('Balance (Available / Purchased)')) ?></th>
                         <td>
-                            <strong><?= $balance ?></strong>
+                            <strong><?= $block->escapeHtml($balance) ?></strong>
                             <a href="https://www.kwtsms.com/login"
                                target="_blank"
                                rel="noopener"
@@ -79,7 +79,7 @@ $syncUrl = $block->escapeUrl($block->getSyncUrl());
                     <?php if ($coverageDisplay): ?>
                     <tr>
                         <th><?= $block->escapeHtml(__('Coverage')) ?></th>
-                        <td><?= $coverageDisplay ?></td>
+                        <td><?= $block->escapeHtml($coverageDisplay) ?></td>
                     </tr>
                     <?php endif; ?>
                     <tr>

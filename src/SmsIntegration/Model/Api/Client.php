@@ -2,8 +2,12 @@
 /**
  * kwtSMS API Client.
  *
- * Handles all HTTP communication with the kwtSMS gateway.
- * Every request is an HTTPS POST with JSON body to https://www.kwtsms.com/API/.
+ * All HTTP communication with the kwtSMS gateway.
+ * Every request: HTTPS POST, Content-Type: application/json.
+ * Base URL: https://www.kwtsms.com/API/
+ *
+ * send() auto-chunks at 200 recipients with 500ms delay between chunks.
+ * Max message length: 7 pages (1120 chars English, 490 chars Arabic).
  *
  * @see \KwtSms\SmsIntegration\Model\Config
  */
@@ -17,31 +21,21 @@ use Psr\Log\LoggerInterface;
 
 class Client
 {
-    /**
-     * Base URL for the kwtSMS API.
-     */
     private const BASE_URL = 'https://www.kwtsms.com/API';
 
-    /**
-     * @var Config
-     */
+    /** kwtSMS API limit: max recipients per request. */
+    private const BATCH_SIZE = 200;
+
+    /** Delay between batch API calls in microseconds (0.5 seconds). */
+    private const BATCH_DELAY_US = 500000;
+
+    /** Max SMS pages: 7 parts, 1071 chars English, 469 chars Arabic (ERR012 at 8+). */
+    public const MAX_PAGES = 7;
+
     private Config $config;
-
-    /**
-     * @var CurlFactory
-     */
     private CurlFactory $curlFactory;
-
-    /**
-     * @var LoggerInterface
-     */
     private LoggerInterface $logger;
 
-    /**
-     * @param Config $config
-     * @param CurlFactory $curlFactory
-     * @param LoggerInterface $logger
-     */
     public function __construct(
         Config $config,
         CurlFactory $curlFactory,
@@ -53,11 +47,8 @@ class Client
     }
 
     /**
-     * Test the API connection with the given credentials.
-     *
-     * @param string $username
-     * @param string $password
-     * @return array
+     * Test connection / login with given credentials.
+     * Calls /balance/ to verify credentials are valid.
      */
     public function testConnection(string $username, string $password): array
     {
@@ -68,70 +59,138 @@ class Client
     }
 
     /**
-     * Get the current account balance.
-     *
-     * @return array
+     * Get current account balance.
+     * Returns: {result, available, purchased}
      */
     public function getBalance(): array
     {
-        $response = $this->doRequest('balance', [
+        return $this->doRequest('balance', [
             'username' => $this->config->getApiUsername(),
             'password' => $this->config->getApiPassword(),
         ]);
-
-        return [
-            'available' => $response['available'] ?? null,
-            'purchased' => $response['purchased'] ?? null,
-            'raw' => $response,
-        ];
     }
 
     /**
-     * Get the list of approved sender IDs.
-     *
-     * @return array
+     * Get approved sender IDs.
+     * Returns: {result, senderid: [...]}
      */
     public function getSenderIds(): array
     {
-        $response = $this->doRequest('senderid', [
+        return $this->doRequest('senderid', [
             'username' => $this->config->getApiUsername(),
             'password' => $this->config->getApiPassword(),
         ]);
-
-        return [
-            'senderid' => $response['senderid'] ?? [],
-            'raw' => $response,
-        ];
     }
 
     /**
-     * Get the coverage prefixes for the account.
-     *
-     * @return array
+     * Get active coverage country prefixes.
+     * Returns: {result, prefixes: [...]}
      */
     public function getCoverage(): array
     {
-        $response = $this->doRequest('coverage', [
+        return $this->doRequest('coverage', [
             'username' => $this->config->getApiUsername(),
             'password' => $this->config->getApiPassword(),
         ]);
-
-        return [
-            'prefixes' => $response['prefixes'] ?? [],
-            'raw' => $response,
-        ];
     }
 
     /**
-     * Send an SMS message.
+     * Send SMS. Handles any number of recipients.
      *
-     * @param string $sender
-     * @param string $mobile
-     * @param string $message
-     * @param bool $testMode
-     * @return array
+     * - 1-200 numbers: single API call
+     * - 200+ numbers: auto-chunks into batches of 200 with 500ms delay
+     *
+     * @param string $sender   Sender ID (case sensitive)
+     * @param string $mobile   Comma-separated phone numbers (already normalized)
+     * @param string $message  Clean message text
+     * @param bool   $testMode If true, messages queued but not delivered
+     * @return array Single-batch: direct API response. Multi-batch: aggregated result.
      */
-    public function sendSms(string $sender, string $mobile, string $message, bool $testMode = false): array
+    public function send(string $sender, string $mobile, string $message, bool $testMode = false): array
+    {
+        // Split mobile string into individual numbers
+        $numbers = array_filter(array_map('trim', explode(',', $mobile)));
+        $count = count($numbers);
+
+        if ($count === 0) {
+            return ['result' => 'ERROR', 'code' => 'ERR006', 'description' => 'No valid numbers submitted'];
+        }
+
+        // Single batch: 1-200 numbers, one API call
+        if ($count <= self::BATCH_SIZE) {
+            return $this->sendBatch($sender, implode(',', $numbers), $message, $testMode);
+        }
+
+        // Multi-batch: 200+ numbers, chunk and send with delay
+        $chunks = array_chunk($numbers, self::BATCH_SIZE);
+        $aggregated = [
+            'result'         => 'OK',
+            'bulk'           => true,
+            'batches'        => count($chunks),
+            'numbers'        => 0,
+            'points-charged' => 0,
+            'balance-after'  => null,
+            'msg-ids'        => [],
+            'errors'         => [],
+        ];
+
+        foreach ($chunks as $index => $chunk) {
+            if ($index > 0) {
+                usleep(self::BATCH_DELAY_US);
+            }
+
+            try {
+                $response = $this->sendBatch($sender, implode(',', $chunk), $message, $testMode);
+
+                if (isset($response['result']) && $response['result'] === 'OK') {
+                    $aggregated['numbers'] += (int) ($response['numbers'] ?? count($chunk));
+                    $aggregated['points-charged'] += (int) ($response['points-charged'] ?? 0);
+                    $aggregated['balance-after'] = $response['balance-after'] ?? $aggregated['balance-after'];
+                    if (isset($response['msg-id'])) {
+                        $aggregated['msg-ids'][] = $response['msg-id'];
+                    }
+                } else {
+                    $aggregated['errors'][] = [
+                        'batch' => $index + 1,
+                        'code'  => $response['code'] ?? $response['result'] ?? 'UNKNOWN',
+                        'description' => $response['description'] ?? 'Unknown error',
+                    ];
+                }
+            } catch (\Exception $e) {
+                $aggregated['errors'][] = [
+                    'batch' => $index + 1,
+                    'code'  => 'EXCEPTION',
+                    'description' => $e->getMessage(),
+                ];
+            }
+        }
+
+        // If all batches failed, mark as ERROR
+        if (empty($aggregated['msg-ids'])) {
+            $aggregated['result'] = 'ERROR';
+        } elseif (!empty($aggregated['errors'])) {
+            $aggregated['result'] = 'PARTIAL';
+        }
+
+        return $aggregated;
+    }
+
+    /**
+     * Validate phone numbers via the API.
+     */
+    public function validateNumbers(array $numbers): array
+    {
+        return $this->doRequest('validate', [
+            'username' => $this->config->getApiUsername(),
+            'password' => $this->config->getApiPassword(),
+            'mobile'   => implode(',', $numbers),
+        ]);
+    }
+
+    /**
+     * Send one batch (up to 200 numbers) to the /send/ endpoint.
+     */
+    private function sendBatch(string $sender, string $mobile, string $message, bool $testMode): array
     {
         $params = [
             'username' => $this->config->getApiUsername(),
@@ -145,41 +204,12 @@ class Client
             $params['test'] = 1;
         }
 
-        $response = $this->doRequest('send', $params);
-
-        return [
-            'result'          => $response['result'] ?? null,
-            'msg-id'          => $response['msg-id'] ?? null,
-            'numbers'         => $response['numbers'] ?? null,
-            'points-charged'  => $response['points-charged'] ?? null,
-            'balance-after'   => $response['balance-after'] ?? null,
-            'unix-timestamp'  => $response['unix-timestamp'] ?? null,
-            'raw'             => $response,
-        ];
+        return $this->doRequest('send', $params);
     }
 
     /**
-     * Validate phone numbers via the API.
-     *
-     * @param array $numbers
-     * @return array
-     */
-    public function validateNumbers(array $numbers): array
-    {
-        return $this->doRequest('validate', [
-            'username' => $this->config->getApiUsername(),
-            'password' => $this->config->getApiPassword(),
-            'mobile'   => implode(',', $numbers),
-        ]);
-    }
-
-    /**
-     * Execute an API request.
-     *
-     * @param string $endpoint
-     * @param array $params
-     * @return array
-     * @throws \RuntimeException
+     * Execute an API request. HTTPS POST with JSON body.
+     * Never logs credentials.
      */
     private function doRequest(string $endpoint, array $params): array
     {
@@ -195,7 +225,6 @@ class Client
             $httpStatus = $curl->getStatus();
 
             if ($this->config->isDebugEnabled()) {
-                // Never log credentials in debug output
                 $safeParams = $params;
                 unset($safeParams['password']);
                 $this->logger->debug('kwtSMS API request', [
@@ -205,25 +234,10 @@ class Client
                 ]);
             }
 
-            if ($httpStatus < 200 || $httpStatus >= 300) {
-                $this->logger->error('kwtSMS API HTTP error', [
-                    'endpoint' => $endpoint,
-                    'status'   => $httpStatus,
-                    'body'     => $responseBody,
-                ]);
-                throw new \RuntimeException(
-                    sprintf('kwtSMS API returned HTTP %d for %s', $httpStatus, $endpoint)
-                );
-            }
-
             $decoded = json_decode($responseBody, true);
             if (!is_array($decoded)) {
-                $this->logger->error('kwtSMS API invalid JSON response', [
-                    'endpoint' => $endpoint,
-                    'body'     => $responseBody,
-                ]);
                 throw new \RuntimeException(
-                    sprintf('kwtSMS API returned invalid JSON for %s', $endpoint)
+                    sprintf('kwtSMS API returned invalid JSON for %s (HTTP %d)', $endpoint, $httpStatus)
                 );
             }
 
