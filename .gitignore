@@ -1,8 +1,7 @@
-# Claude Code / AI
+# Local config
 .claude/
-CLAUDE.md
-napkin.md
 .worktrees/
+napkin.md
 
 # Documentation (local only)
 docs/

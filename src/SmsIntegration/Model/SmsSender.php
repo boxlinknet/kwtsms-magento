@@ -71,7 +71,7 @@ class SmsSender
      * @return array{success:bool, sent:int, failed:int, skipped:int, invalid:int, error:?string, msg_ids:string[]}
      */
     public function send(
-        $recipients,
+        string|array $recipients,
         string $message,
         string $eventType,
         ?string $relatedEntityId = null,

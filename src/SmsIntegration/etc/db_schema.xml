@@ -15,14 +15,14 @@
     <!-- SMS Log: stores every send attempt -->
     <table name="kwtsms_sms_log" resource="default" engine="innodb" comment="kwtSMS SMS Log">
         <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true" comment="Log ID"/>
-        <column xsi:type="varchar" name="recipient" nullable="false" length="20" comment="Full phone number"/>
+        <column xsi:type="text" name="recipient" nullable="false" comment="Phone number(s), comma-separated for bulk"/>
         <column xsi:type="text" name="message" nullable="false" comment="Message body sent"/>
         <column xsi:type="varchar" name="event_type" nullable="false" length="50" comment="Trigger event identifier"/>
         <column xsi:type="varchar" name="status" nullable="false" length="20" default="pending" comment="sent|failed|queued|test|skipped"/>
         <column xsi:type="text" name="api_response" nullable="true" comment="Full JSON API response"/>
         <column xsi:type="varchar" name="msg_id" nullable="true" length="64" comment="kwtSMS message ID"/>
         <column xsi:type="int" name="points_charged" unsigned="true" nullable="false" default="0" comment="Credits used"/>
-        <column xsi:type="varchar" name="error_code" nullable="true" length="10" comment="Error code if failed"/>
+        <column xsi:type="varchar" name="error_code" nullable="true" length="255" comment="Error message if failed"/>
         <column xsi:type="varchar" name="related_entity_id" nullable="true" length="50" comment="Order ID, customer ID, etc."/>
         <column xsi:type="varchar" name="related_entity_type" nullable="true" length="30" comment="order|customer|shipment|etc."/>
         <column xsi:type="smallint" name="test_mode" unsigned="true" nullable="false" default="0" comment="1 if sent in test mode"/>
