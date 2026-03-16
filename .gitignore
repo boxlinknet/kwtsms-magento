@@ -10,8 +10,10 @@ docs/
 .env
 .env.*
 
-# Docker volumes and data
-docker/data/
+# Docker (local dev only)
+docker/
+docker-compose.yml
+CLAUDE.md
 
 # IDE
 .idea/
