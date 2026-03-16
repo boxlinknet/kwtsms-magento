@@ -1,5 +1,11 @@
 # kwtSMS for Magento 2
 
+[![CodeQL](https://github.com/boxlinknet/kwtsms-magento/actions/workflows/codeql.yml/badge.svg)](https://github.com/boxlinknet/kwtsms-magento/actions/workflows/codeql.yml)
+[![GitGuardian](https://github.com/boxlinknet/kwtsms-magento/actions/workflows/gitguardian.yml/badge.svg)](https://github.com/boxlinknet/kwtsms-magento/actions/workflows/gitguardian.yml)
+[![Magento](https://img.shields.io/badge/Magento-2.4.7+-orange.svg)](https://magento.com)
+[![PHP](https://img.shields.io/badge/PHP-8.2%20|%208.3-blue.svg)](https://php.net)
+[![License](https://img.shields.io/badge/License-OSL--3.0-green.svg)](LICENSE)
+
 SMS notifications and OTP verification for Adobe Commerce (Magento 2) via the [kwtSMS](https://www.kwtsms.com) gateway.
 
 ## Features
@@ -68,9 +74,9 @@ docker compose up -d
 docker compose exec php bash /var/www/html/docker/install-magento.sh
 ```
 
-- Storefront: http://localhost:8080
-- Admin: http://localhost:8080/admin (admin / Admin123!)
-- phpMyAdmin: http://localhost:8082
+- Storefront: http://localhost:8085
+- Admin: http://localhost:8085/admin
+- phpMyAdmin: http://localhost:8083
 
 ## Security
 
